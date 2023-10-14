@@ -106,13 +106,13 @@ function Problem(props) {
     <>
       <Row ref={elementRef}>
         <Col className="text-end pt-2">
-          Convert <strong>{formatValue(from, value)}</strong> to <strong>{localize(to)}</strong>
+          Convert <strong style={{"white-space": "nowrap"}}>{formatValue(from, value)}</strong><br className="d-sm-none" /> to <strong>{localize(to)}</strong>
         </Col>
-        <Col>
+        <Col xs={3}>
           {typeof(answer) === 'undefined' ? <Form.Control ref={inputRef} className="text-end" type="text" onChange={handleChange} onKeyDown={handleKeyDown} value={currentAnswer}/> : ""}
           {typeof(answer) !== 'undefined' ? <Form.Control className="text-end " type="text" value={answer} disabled/> : ""}
         </Col>
-        <Col className={"pt-2 " + correctClass()}>
+        <Col xs={3} className={"pt-2 " + correctClass()}>
           {typeof(answer) !== 'undefined'
             ? isCorrect()
               ? "Correct! "
