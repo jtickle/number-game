@@ -1,13 +1,12 @@
 import { useState } from 'react';
 
 import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import MainNav from './MainNav';
 
 import Problem from './Problem';
-import SettingChange from './SettingChange';
-import { Form } from 'react-bootstrap';
+import Settings from './Settings';
 
 function randSel(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -16,66 +15,66 @@ function randSel(list) {
 function App() {
   const [prefs, setPrefs] = useState({
     bits: 8,
-    convertFrom: ['hex', 'bin', 'dec'],
-    convertTo: ['hex', 'bin', 'dec'],
+    convertFrom: [2, 10, 16],
+    convertTo: [2, 10, 16],
   })
   const [questions, setQuestions] = useState([])
+  const [showSettings, setShowSettings] = useState(false)
 
   function makeNextQuestion() {
-    const newQuestions = [...questions]
-
     const from = randSel(prefs.convertFrom)
     const to = randSel(prefs.convertTo.filter((x) => x != from))
     const value = Math.floor(Math.random() * Math.pow(2, prefs.bits))
 
-    newQuestions.push({from, to, value})
-    setQuestions(newQuestions)
+    setQuestions((questions) => [...questions, {from, to, value}])
   }
 
   function submitAnswer(answer) {
-    const newQuestions = [...questions]
-
-    newQuestions[questions.length - 1].answer = answer
-    setQuestions(newQuestions)
-    
+    setQuestions((questions) => { 
+      const newQuestions = [...questions]
+      newQuestions[questions.length - 1].answer = answer
+      return newQuestions
+    })
     makeNextQuestion()
   }
 
-  function updateBits(bits) {
-    const newPrefs = {...prefs}
-
-    newPrefs.bits = parseInt(bits)
-
-    setPrefs(newPrefs)
+  function newGame() {
+    setQuestions(() => [])
+    makeNextQuestion()
   }
 
   console.log(prefs, questions);
 
+  const correctVals = questions.reduce((acc, q) => {
+    var [of, total] = acc
+    total += 1
+    if(q.answer && parseInt(q.answer.replace(/ +/g, ''), q.to) === q.value) {
+      of += 1
+    }
+    return [of, total]
+  }, [0,0])
+  const correct=`${correctVals[0]}/${correctVals[1]-1}`
+  console.log(correct)
+
   return (
-    <Container className="mt-3">
-      <Row>
-        <Col xs={9}>
-          <Container>
-            <>
+    <>
+      <Container className="mt-3">
+        <Row>
+          <Col xs={12}>
+            <Container>
               {questions.map((question, i) =>
                 typeof(question.answer) == 'undefined'
                   ? <Problem key={i} {...question} submitAnswer={submitAnswer} />
                   : <Problem key={i} {...question} />
               )}
-            </>
-            {questions.length == 0 ? <Button onClick={makeNextQuestion}>Start!!</Button> : ""}
-          </Container>
-        </Col>
-        <Col>
-          <Form className="position-fixed">
-            <Form.Group>
-              <Form.Label>Number of Bits</Form.Label>
-              <SettingChange value={prefs.bits} onChange={updateBits} />
-            </Form.Group>
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+              <div className="mb-5 pb-5"></div>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+      <MainNav newGame={newGame} correct={correct} showSettings={() => setShowSettings(true)} />
+      <Settings prefs={prefs} setPrefs={setPrefs} show={showSettings} onHide={() => setShowSettings(false)} />
+    </>
   );
 }
 

@@ -50,30 +50,33 @@ function Problem(props) {
   function as_hex(n) {
     return "0x" + n.toString(16).toUpperCase();
   }
+  function as_generic(base, n) {
+    return n.toString(base)
+  }
 
-  function formatValue(as, value) {
-    switch(as) {
-      case "bin":
+  function formatValue(base, value) {
+    switch(base) {
+      case 2:
         return as_bin(value)
-      case "hex":
+      case 16:
         return as_hex(value)
-      case "dec":
+      case 10:
         return as_dec(value)
       default:
-        console.error("Unsupported from format: " + from);
+        return as_generic(base, value)
     }
   }
 
   function localize(base) {
     switch(base) {
-      case "bin":
+      case 2:
         return "Binary";
-      case "hex":
+      case 16:
         return "Hexadecimal";
-      case "dec":
+      case 10:
         return "Decimal";
       default:
-        console.error("Unsupported base: " + base);
+        return "Base " + base;
     }
   }
 
@@ -87,19 +90,33 @@ function Problem(props) {
     }
   }
 
+  function isCorrect() {
+    if(!answer) return false;
+    const parsed = parseInt(answer.replace(/ +/g, ''), to)
+    return parsed == value
+  }
+
+  function correctClass() {
+    return isCorrect()
+      ? "text-success"
+      : "text-danger"
+  }
+
   return (
     <>
       <Row ref={elementRef}>
-        <Col xs={6} className="text-end pt-2">
+        <Col className="text-end pt-2">
           Convert <strong>{formatValue(from, value)}</strong> to <strong>{localize(to)}</strong>
         </Col>
         <Col>
           {typeof(answer) === 'undefined' ? <Form.Control ref={inputRef} className="text-end" type="text" onChange={handleChange} onKeyDown={handleKeyDown} value={currentAnswer}/> : ""}
-          {typeof(answer) !== 'undefined' ? <Form.Control className="text-end" type="text" value={answer} disabled/> : ""}
+          {typeof(answer) !== 'undefined' ? <Form.Control className="text-end " type="text" value={answer} disabled/> : ""}
         </Col>
-        <Col>
+        <Col className={"pt-2 " + correctClass()}>
           {typeof(answer) !== 'undefined'
-            ? <p>Correct Answer: {formatValue(to, value)}</p>
+            ? isCorrect()
+              ? "Correct! "
+              : formatValue(to, value)
             : ""}
         </Col>
       </Row>
