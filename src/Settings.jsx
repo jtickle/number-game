@@ -46,7 +46,7 @@ function Settings (props) {
           <Form.Group>
             Conversions
             <ChooseBases bases={conversionsState} setBases={setConversionsState} onChange={setConversionsState} />
-            <small>If you want a base that isn't listed, just enter the radix in decimal. Due to Javascript limitations, this game is limited to base 36. Special base64 support coming soon!!</small>
+            <small>If you want a base that isn&apos;t listed, just enter the radix in decimal. Due to Javascript limitations, this game is limited to base 36. Special base64 support coming soon!!</small>
           </Form.Group>
         </Form>
       </Modal.Body>
