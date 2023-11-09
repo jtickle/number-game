@@ -8,24 +8,16 @@ import MainNav from './MainNav'
 import Problem from './Problem'
 import Settings from './Settings'
 
-function randSel (list) {
-  return list[Math.floor(Math.random() * list.length)]
-}
+import QuestionManager from './Questions/QuestionManager'
 
 function App () {
-  const [prefs, setPrefs] = useState({
-    bits: 8,
-    conversions: [2, 10, 16]
-  })
+  const [prefs, setPrefs] = useState(QuestionManager.getDefaultPrefs())
   const [questions, setQuestions] = useState([])
   const [showSettings, setShowSettings] = useState(false)
 
   function makeNextQuestion () {
-    const from = randSel(prefs.conversions)
-    const to = randSel(prefs.conversions.filter((x) => x !== from))
-    const value = Math.floor(Math.random() * Math.pow(2, prefs.bits))
-
-    setQuestions((questions) => [...questions, { from, to, value }])
+    setQuestions((questions) =>
+      [...questions, QuestionManager.makeQuestion(prefs)])
   }
 
   function submitAnswer (answer) {
@@ -63,8 +55,8 @@ function App () {
             <Container>
               {questions.map((question, i) =>
                 typeof (question.answer) === 'undefined'
-                  ? <Problem key={i} {...question} submitAnswer={submitAnswer} />
-                  : <Problem key={i} {...question} />
+                  ? <Problem key={i} question={question} submitAnswer={submitAnswer} />
+                  : <Problem key={i} question={question} />
               )}
               <div className='mb-5 pb-5' />
             </Container>

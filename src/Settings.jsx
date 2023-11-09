@@ -1,25 +1,26 @@
 import PropTypes from 'prop-types'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
+
+import cloneDeep from 'lodash/cloneDeep'
 
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
 
-import ChooseBases from './ChooseBases'
+import QuestionManager from './Questions/QuestionManager'
 
 function Settings (props) {
-  const bits = useRef(null)
-
-  const [conversionsState, setConversionsState] = useState(props.prefs.conversions)
+  const newPrefs = {}
+  const setNewPrefs = {}
+  for (const key of Object.keys(props.prefs)) {
+    [newPrefs[key], setNewPrefs[key]] = useState(cloneDeep(props.prefs[key]))
+  }
 
   function save (e) {
     if (typeof (e) !== 'undefined') {
       e.preventDefault()
     }
-    props.setPrefs(() => ({
-      bits: parseInt(bits.current.value),
-      conversions: conversionsState
-    }))
+    props.setPrefs(newPrefs)
     props.onHide()
   }
 
@@ -28,6 +29,10 @@ function Settings (props) {
       e.preventDefault()
     }
     props.onHide()
+  }
+
+  function prefsValid () {
+    return Object.keys(newPrefs).some((k) => newPrefs[k].enabled)
   }
 
   return (
@@ -39,20 +44,13 @@ function Settings (props) {
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={save}>
-          <Form.Group>
-            <Form.Label>Number of Bits</Form.Label>
-            <Form.Control ref={bits} className='text-end' defaultValue={props.prefs.bits} />
-          </Form.Group>
-          <Form.Group>
-            Conversions
-            <ChooseBases bases={conversionsState} setBases={setConversionsState} onChange={setConversionsState} />
-            <small>If you want a base that isn&apos;t listed, just enter the radix in decimal. Due to Javascript limitations, this game is limited to base 36. Special base64 support coming soon!!</small>
-          </Form.Group>
+          {QuestionManager.showSettings(newPrefs, setNewPrefs)}
         </Form>
+        <small>Setting changes won't take effect until your next question.</small>
       </Modal.Body>
       <Modal.Footer>
         <Button variant='secondary' onClick={close}>Close</Button>
-        <Button variant='primary' onClick={save}>Save</Button>
+        <Button variant='primary' onClick={save} disabled={!prefsValid()}>Save</Button>
       </Modal.Footer>
     </Modal>
   )

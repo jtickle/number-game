@@ -1,15 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 
-import baseutil from './baseutil'
-
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 
 function Problem (props) {
-  const { from, to, value, answer, submitAnswer } = props
-
+  const { question, submitAnswer } = props
   const [currentAnswer, setCurrentAnswer] = useState('')
 
   const elementRef = useRef(null)
@@ -34,14 +31,8 @@ function Problem (props) {
     }
   }
 
-  function isCorrect () {
-    if (!answer) return false
-    const parsed = parseInt(answer.replace(/ +/g, ''), to)
-    return parsed === value
-  }
-
   function correctClass () {
-    return isCorrect()
+    return question.isCorrect()
       ? 'text-success'
       : 'text-danger'
   }
@@ -50,17 +41,17 @@ function Problem (props) {
     <>
       <Row ref={elementRef}>
         <Col className='text-end pt-2'>
-          Convert <strong style={{ whiteSpace: 'nowrap' }}>{baseutil.formatValue(from, value)}</strong><br className='d-sm-none' /> to <strong>{baseutil.localize(to)}</strong>
+          {question.instruction()}
         </Col>
         <Col xs={3}>
-          {typeof (answer) === 'undefined' ? <Form.Control ref={inputRef} className='text-end' type='text' onChange={handleChange} onKeyDown={handleKeyDown} value={currentAnswer} /> : ''}
-          {typeof (answer) !== 'undefined' ? <Form.Control className='text-end ' type='text' value={answer} disabled /> : ''}
+          {typeof (question.answer) === 'undefined' ? <Form.Control ref={inputRef} className='text-end' type='text' onChange={handleChange} onKeyDown={handleKeyDown} value={currentAnswer} /> : ''}
+          {typeof (question.answer) !== 'undefined' ? <Form.Control className='text-end ' type='text' value={question.answer} disabled /> : ''}
         </Col>
         <Col xs={3} className={'pt-2 ' + correctClass()}>
-          {typeof (answer) !== 'undefined'
-            ? isCorrect()
+          {typeof (question.answer) !== 'undefined'
+            ? question.isCorrect()
               ? 'Correct! '
-              : baseutil.formatValue(to, value)
+              : question.showAnswer()
             : ''}
         </Col>
       </Row>
@@ -70,10 +61,7 @@ function Problem (props) {
 }
 
 Problem.propTypes = {
-  from: PropTypes.number.isRequired,
-  to: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-  answer: PropTypes.string,
+  question: PropTypes.object.isRequired,
   submitAnswer: PropTypes.func
 }
 
