@@ -1,8 +1,10 @@
 import Form from 'react-bootstrap/Form'
+import PropTypes from 'prop-types'
 
 import sample from 'lodash/sample'
 import baseutil from '../baseutil'
 import ChooseBases from '../ChooseBases'
+import Prob from '../Problem'
 
 export const typeName = 'conversion'
 
@@ -33,24 +35,34 @@ export function isCorrect () {
   return parsed === this.value
 }
 
-export function instruction () {
+export function View (props) {
+  const fromVal = (<Prob.Val>{baseutil.formatValue(this.from, this.value)}</Prob.Val>)
+  const toVal = (<Prob.Val>{baseutil.localize(this.to)}</Prob.Val>)
+  const answer = this.isAnswered() ? baseutil.formatValue(this.to, this.value) : ''
+
+  // TODO: useRef to focus the Response input
+  // or maybe the response input is responsible for that?
+  // if (inputRef.current) {
+  //   inputRef.current.focus()
+  // }
+
   return (
-    <>
-      Convert&nbsp;
-      <strong style={{ whiteSpace: 'nowrap' }}>
-        {baseutil.formatValue(this.from, this.value)}
-      </strong>
-      <br className='d-sm-none' />
-      &nbsp;to&nbsp;
-      <strong>
-        {baseutil.localize(this.to)}
-      </strong>
-    </>
+    <Prob>
+      <Prob.Instruction>
+        Convert {fromVal}<Prob.Br /> to {toVal}
+      </Prob.Instruction>
+      <Prob.Question>
+        <Prob.Response answered={this.isAnswered()} submitAnswer={props.submitAnswer} />
+      </Prob.Question>
+      <Prob.Answer correct={this.isCorrect()}>
+        {answer}
+      </Prob.Answer>
+    </Prob>
   )
 }
 
-export function showAnswer () {
-  return baseutil.formatValue(this.to, this.value)
+View.propTypes = {
+  submitAnswer: PropTypes.func
 }
 
 export function showSettings (prefs, setPrefs) {
@@ -75,7 +87,6 @@ export default {
   makeQuestion,
   getDefaultPrefs,
   isCorrect,
-  instruction,
-  showAnswer,
+  View,
   showSettings
 }

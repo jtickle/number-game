@@ -5,17 +5,71 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 
-function Problem (props) {
-  const { question, submitAnswer } = props
-  const [currentAnswer, setCurrentAnswer] = useState('')
+export function Problem (props) {
+  const elementRef = useRef()
 
-  const elementRef = useRef(null)
-  const inputRef = useRef(null)
+  const children = props.children
 
   useEffect(() => {
     if (elementRef.current) {
       elementRef.current.scrollIntoView()
     }
+  })
+
+  return (
+    <>
+      <Row ref={elementRef}>
+        {children}
+      </Row>
+      <hr />
+    </>
+  )
+}
+
+export function Instruction ({ children }) {
+  return (
+    <Col className='text-end pt-2'>
+      {children}
+    </Col>
+  )
+}
+
+export function Question ({ children }) {
+  return (
+    <Col xs={3}>
+      {children}
+    </Col>
+  )
+}
+
+export function Answer ({ correct, children }) {
+  const correctClass = correct ? 'text-success' : 'text-danger'
+  const show = correct ? 'Correct!' : children
+  return (
+    <Col xs={3} className={'pt-2 ' + correctClass}>
+      {show}
+    </Col>
+  )
+}
+
+export function Br () {
+  return (
+    <br className='d-sm-none' />
+  )
+}
+
+export function Val ({ children }) {
+  return (
+    <strong style={{ whiteSpace: 'nowrap' }}>{children}</strong>
+  )
+}
+
+export function Response ({ answered, answer, submitAnswer }) {
+  const [currentAnswer, setCurrentAnswer] = useState('')
+
+  const inputRef = useRef(null)
+
+  useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus()
     }
@@ -31,34 +85,28 @@ function Problem (props) {
     }
   }
 
-  function correctClass () {
-    return question.isCorrect()
-      ? 'text-success'
-      : 'text-danger'
+  const commonProps = {
+    className: 'text-end',
+    type: 'text'
   }
 
-  return (
-    <>
-      <Row ref={elementRef}>
-        <Col className='text-end pt-2'>
-          {question.instruction()}
-        </Col>
-        <Col xs={3}>
-          {typeof (question.answer) === 'undefined' ? <Form.Control ref={inputRef} className='text-end' type='text' onChange={handleChange} onKeyDown={handleKeyDown} value={currentAnswer} /> : ''}
-          {typeof (question.answer) !== 'undefined' ? <Form.Control className='text-end ' type='text' value={question.answer} disabled /> : ''}
-        </Col>
-        <Col xs={3} className={'pt-2 ' + correctClass()}>
-          {typeof (question.answer) !== 'undefined'
-            ? question.isCorrect()
-              ? 'Correct! '
-              : question.showAnswer()
-            : ''}
-        </Col>
-      </Row>
-      <hr />
-    </>
-  )
+  if (answered) {
+    return (
+      <Form.Control {...commonProps} value={answer} disabled />
+    )
+  } else {
+    return (
+      <Form.Control ref={inputRef} {...commonProps} onChange={handleChange} onKeyDown={handleKeyDown} value={currentAnswer} />
+    )
+  }
 }
+
+Problem.Instruction = Instruction
+Problem.Question = Question
+Problem.Answer = Answer
+Problem.Br = Br
+Problem.Val = Val
+Problem.Response = Response
 
 Problem.propTypes = {
   question: PropTypes.object.isRequired,

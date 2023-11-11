@@ -5,7 +5,6 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import MainNav from './MainNav'
 
-import Problem from './Problem'
 import Settings from './Settings'
 
 import QuestionManager from './Questions/QuestionManager'
@@ -34,8 +33,6 @@ function App () {
     makeNextQuestion()
   }
 
-  console.log(prefs, questions)
-
   const correctVals = questions.reduce((acc, q) => {
     let [of, total] = acc
     total += 1
@@ -45,7 +42,6 @@ function App () {
     return [of, total]
   }, [0, 0])
   const correct = `${correctVals[0]}/${correctVals[1] - 1}`
-  console.log(correct)
 
   return (
     <>
@@ -53,11 +49,7 @@ function App () {
         <Row>
           <Col xs={12}>
             <Container>
-              {questions.map((question, i) =>
-                typeof (question.answer) === 'undefined'
-                  ? <Problem key={i} question={question} submitAnswer={submitAnswer} />
-                  : <Problem key={i} question={question} />
-              )}
+              {questions.map((question, i) => (<question.View key={i} submitAnswer={submitAnswer} />))}
               <div className='mb-5 pb-5' />
             </Container>
           </Col>
